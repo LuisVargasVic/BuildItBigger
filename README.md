@@ -1,4 +1,6 @@
 # Gradle for Android and Java Final Project
+# BuildItBigger
+Gradle for Android and Java Udacity final project
 
 In this project, you will create an app with multiple flavors that uses
 multiple libraries and Google Cloud Endpoints. The finished app will consist
