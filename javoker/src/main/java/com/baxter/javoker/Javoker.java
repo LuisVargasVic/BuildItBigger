@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Javoker {
 
-    List<String> jokes = new ArrayList<>();
+    public List<String> jokes = new ArrayList<>();
 
     // Jokes retrieved from https://www.goodhousekeeping.com/life/parenting/g28581033/best-jokes-for-kids/
     public void populateJokes() {

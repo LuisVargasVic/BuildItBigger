@@ -6,7 +6,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.test.espresso.IdlingResource;
 
 import com.baxter.jokeview.JokerFragment;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -14,6 +18,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
+import com.udacity.gradle.builditbigger.utils.SimpleIdlingResource;
 
 import java.io.IOException;
 
@@ -21,6 +26,22 @@ import static com.baxter.jokeview.JokerFragment.JOKE_ID;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    // The Idling Resource which will be null in production.
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
+    /**
+     * Only called from test, creates and returns a new {@link IdlingResource}.
+     */
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +82,13 @@ public class MainActivity extends AppCompatActivity {
         private MyApi myApiService = null;
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            assert mIdlingResource != null;
+            mIdlingResource.setIdleState(false);
+        }
+
+        @Override
         protected String doInBackground(Void... params) {
             if(myApiService == null) {  // Only do this once
                 MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
@@ -97,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, jokerFragment)
                     .commitAllowingStateLoss();
+
+            assert mIdlingResource != null;
+            mIdlingResource.setIdleState(true);
         }
     }
 

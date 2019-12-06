@@ -17,7 +17,7 @@ public class JokerFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_joke, container, false);
+        View view = inflater.inflate(R.layout.fragment_joker, container, false);
         TextView textView = view.findViewById(R.id.joke);
 
         assert getArguments() != null;
