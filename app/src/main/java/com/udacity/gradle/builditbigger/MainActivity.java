@@ -84,8 +84,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            assert mIdlingResource != null;
-            mIdlingResource.setIdleState(false);
+            if (mIdlingResource != null) mIdlingResource.setIdleState(false);
         }
 
         @Override
@@ -126,8 +125,7 @@ public class MainActivity extends AppCompatActivity {
                     .replace(R.id.container, jokerFragment)
                     .commitAllowingStateLoss();
 
-            assert mIdlingResource != null;
-            mIdlingResource.setIdleState(true);
+            if (mIdlingResource != null) mIdlingResource.setIdleState(true);
         }
     }
 
