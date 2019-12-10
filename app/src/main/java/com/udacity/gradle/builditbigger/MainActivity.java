@@ -1,6 +1,5 @@
 package com.udacity.gradle.builditbigger;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,14 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.test.espresso.IdlingResource;
 
 import com.baxter.jokeview.JokerFragment;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
-import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
-import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
-import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
+import com.udacity.gradle.builditbigger.services.EndpointsAsyncTask;
+import com.udacity.gradle.builditbigger.services.OnEventListener;
 import com.udacity.gradle.builditbigger.utils.SimpleIdlingResource;
-
-import java.io.IOException;
 
 import static com.baxter.jokeview.JokerFragment.JOKE_ID;
 
@@ -72,61 +66,31 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Implement reviewer suggestion from this link https://gist.github.com/cesarferreira/ef70baa8d64f9753b4da
+    // Interface handle the callbacks
     public void tellJoke(View view) {
-        new EndpointsAsyncTask().execute();
-    }
+        new EndpointsAsyncTask(
+            new OnEventListener<String>() {
+                @Override
+                public void onPreExecution() {
+                    if (mIdlingResource != null) mIdlingResource.setIdleState(false);
+                }
 
-    // Got help from GoogleCloudPlatform
-    // https://github.com/GoogleCloudPlatform/gradle-appengine-templates/tree/77e9910911d5412e5efede5fa681ec105a0f02ad/HelloEndpoints#2-connecting-your-android-app-to-the-backend
-    class EndpointsAsyncTask extends AsyncTask<Void, Void, String> {
-        private MyApi myApiService = null;
+                @Override
+                public void onPostExecution(String result) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(JOKE_ID, result);
+                    JokerFragment jokerFragment = new JokerFragment();
+                    jokerFragment.setArguments(bundle);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (mIdlingResource != null) mIdlingResource.setIdleState(false);
-        }
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, jokerFragment)
+                            .commitAllowingStateLoss();
 
-        @Override
-        protected String doInBackground(Void... params) {
-            if(myApiService == null) {  // Only do this once
-                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
-                        new AndroidJsonFactory(), null)
-                        // options for running against local devappserver
-                        // - 10.0.2.2 is localhost's IP address in Android emulator
-                        // - turn off compression when running against local devappserver
-                        .setRootUrl("http://10.0.2.2:8080/_ah/api/")
-                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
-                            @Override
-                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
-                                abstractGoogleClientRequest.setDisableGZipContent(true);
-                            }
-                        });
-                // end options for devappserver
-
-                myApiService = builder.build();
+                    if (mIdlingResource != null) mIdlingResource.setIdleState(true);
+                }
             }
-
-            try {
-                return myApiService.javoke().execute().getData();
-            } catch (IOException e) {
-                return e.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Bundle bundle = new Bundle();
-            bundle.putString(JOKE_ID, result);
-            JokerFragment jokerFragment = new JokerFragment();
-            jokerFragment.setArguments(bundle);
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, jokerFragment)
-                    .commitAllowingStateLoss();
-
-            if (mIdlingResource != null) mIdlingResource.setIdleState(true);
-        }
+        ).execute();
     }
 
 }
