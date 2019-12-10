@@ -31,7 +31,15 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/fragment"
         app:layout_constraintTop_toBottomOf="@id/tell"/>
+
+    <fragment
+        android:id="@+id/fragment"
+        android:name="com.udacity.gradle.builditbigger.MainActivityFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout="@layout/fragment_main" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
